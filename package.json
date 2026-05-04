@@ -5,7 +5,7 @@
     "main": "index.js",
     "type": "module",
     "bin": {
-        "create-node-app": "./bin/cli.js"
+        "create-node-app": "bin/cli.js"
     },
     "scripts": {
         "start": "node ./bin/cli.js"
@@ -15,5 +15,20 @@
         "commander": "^12.0.0",
         "inquirer": "^9.2.14",
         "ora": "^8.0.1"
-    }
+    },
+    "devDependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/KrishDhimanOfficial/create_node_app.git"
+    },
+    "keywords": [
+        "node",
+        "utility"
+    ],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/KrishDhimanOfficial/create_node_app/issues"
+    },
+    "homepage": "https://github.com/KrishDhimanOfficial/create_node_app#readme"
 }
