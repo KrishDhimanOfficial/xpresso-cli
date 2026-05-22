@@ -1,51 +1,83 @@
-# create-node-app
+# @apexkrrish/create-node-app
 
-A fast and interactive CLI tool to scaffold Node.js applications.
+A powerful and fast CLI tool to scaffold production-ready Node.js applications with built-in database configurations and modular service generation.
 
 ## Features
 
-- **Interactive Prompts**: Choose your project name, package manager, and database just by answering simple questions.
-- **Multiple Package Managers**: Supports `npm`, `yarn`, and `pnpm`.
-- **Database Configuration**: Automatically configures database connections with pre-written boilerplate for:
-  - MongoDB (using Mongoose)
-  - PostgreSQL (using Sequelize)
-  - None (no database setup out-of-the-box)
-- **Ready to Go**: Automatically installs dependencies and sets up the basic folder structure based on the provided template.
+- Scaffolds a complete Express.js server structure.
+- Automatic database setup (MongoDB/Mongoose or PostgreSQL/Sequelize).
+- Integrated auto-generator for new service modules (Controllers, Models, Routes).
+- Pre-configured `app.js` with best practices (CORS, compression, error handlers).
 
-## Usage
+## Installation & Usage
 
-You can use the CLI directly:
+You don't need to install this globally (though you can if you want). The easiest way to use it is with `npx`.
+
+### 1. Create a New Application
+
+To create a brand new Node.js app, simply run:
 
 ```bash
-npx create-node-app [project-directory]
+npx @apexkrrish/create-node-app my-app
 ```
+*(If you leave out the `my-app` name, the CLI will ask you for it!)*
 
-Or, if you clone locally and link:
+The CLI will prompt you to choose:
+- Your preferred package manager (`npm`, `yarn`, `pnpm`).
+- Your preferred database (`MongoDB`, `PostgreSQL`, or `None`).
 
-```bash
-npm start -- my-new-project
-```
+It will then automatically scaffold your project, configure the database connection, generate an initial `auth` service tailored to your selected database, and install dependencies!
 
-### Interactive Prompts
-
-If you do not provide a project directory, the CLI will ask you for one. It will then prompt you to answer the following:
-
-1. **What is your project named?** (if no folder name was supplied)
-2. **Which package manager would you like to use?**
-   - npm
-   - yarn
-   - pnpm
-3. **Which database would you like to use?**
-   - MongoDB (Mongoose)
-   - PostgreSQL (Sequelize)
-   - None
-
-### After Setup
-
-Once the tool has finished scaffolding the project and installing dependencies, you can navigate into your new app and start the development server:
+### 2. Run Your Application
 
 ```bash
-cd <your-project-directory>
+cd my-app
 npm run dev
 ```
-*(Replace `npm` with your chosen package manager!)*
+
+---
+
+## Code Generator: Create Services
+
+Once your application is created, this tool comes with an amazing built-in code generator that saves you from writing boilerplate.
+
+To generate a new service module (for example, a `user` service), navigate into your project folder and run:
+
+```bash
+npx create-service user
+```
+
+*(If you installed the CLI globally via `npm install -g @apexkrrish/create-node-app`, you can just type `create-service user`)*
+
+### What it does:
+1. It creates `services/user/controller/user.controller.js`
+2. It creates `services/user/routes/user.routes.js`
+3. It detects the database you chose during setup (Mongoose or Sequelize) and generates the correct `services/user/model/user.model.js` structure automatically!
+4. **It automatically updates your `app.js` file** to import and register your new routes!
+
+---
+
+## Folder Structure Generated
+
+```
+my-app/
+├── bin/
+│   └── www
+├── config/
+│   └── db.config.js       # Database connection
+├── public/
+├── services/
+│   ├── auth/              # Automatically generated on init
+│   │   ├── controller/
+│   │   ├── model/
+│   │   └── routes/
+│   └── <your-service>/    # Generated via 'create-service'
+├── utils/
+│   └── helper.utils.js
+├── app.js                 # Express configuration (auto-updated)
+└── package.json
+```
+
+## License
+
+ISC License.
