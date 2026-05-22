@@ -25,9 +25,18 @@
     },
     "keywords": [
         "node",
-        "utility"
+        "nodejs",
+        "cli",
+        "scaffold",
+        "generator",
+        "boilerplate",
+        "express",
+        "mongoose",
+        "sequelize",
+        "mvc",
+        "create-node-app"
     ],
-    "author": "",
+    "author": "Krish Dhiman",
     "license": "ISC",
     "bugs": {
         "url": "https://github.com/KrishDhimanOfficial/create_node_app/issues"
