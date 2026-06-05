@@ -1,12 +1,12 @@
 {
-    "name": "@apexkrrish/create-node-app",
-    "version": "1.1.0",
+    "name": "create-node-app",
+    "version": "1.1.2",
     "description": "A CLI tool to scaffold Node.js applications.",
     "main": "index.js",
     "type": "module",
     "private": false,
     "bin": {
-        "create-node-app": "bin/cli.js",
+        "create-express-app": "bin/cli.js",
         "create-service": "bin/create-service-cli.js"
     },
     "scripts": {
@@ -24,17 +24,24 @@
         "url": "git+https://github.com/KrishDhimanOfficial/create_node_app.git"
     },
     "keywords": [
+        "express",
+        "express.js",
+        "create-express-app",
         "node",
         "nodejs",
         "cli",
         "scaffold",
         "generator",
+        "express-generator",
         "boilerplate",
-        "express",
-        "mongoose",
-        "sequelize",
+        "starter",
         "mvc",
-        "create-node-app"
+        "modular",
+        "api",
+        "mongoose",
+        "mongodb",
+        "sequelize",
+        "postgresql"
     ],
     "author": "Krish Dhiman",
     "license": "ISC",
