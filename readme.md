@@ -1,6 +1,6 @@
-# 🚀 create-express-app
+# 🚀 create-node-app
 
-[![npm version](https://img.shields.io/npm/v/create-express-app.svg)](https://www.npmjs.com/package/create-express-app)
+[![npm version](https://img.shields.io/npm/v/create-node-app.svg)](https://www.npmjs.com/package/create-node-app)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
 A powerful, incredibly fast CLI tool to instantly scaffold production-ready Node.js Express applications. It comes packed with built-in database configurations and an intuitive modular service generator, saving you hours of boilerplate setup.
@@ -24,7 +24,7 @@ A powerful, incredibly fast CLI tool to instantly scaffold production-ready Node
 You don't need to install anything globally. You can create a new application instantly using `npx`.
 
 ```bash
-npx create-express-app my-app
+npx create-node-app my-app
 ```
 *(If you run the command without a folder name, the CLI will interactively ask you for it!)*
 
@@ -60,7 +60,7 @@ You now have a fully functional Node.js server running! 🎉
 
 ## 🏗️ Generating New Services (The Magic)
 
-Once your application is created, `create-express-app` provides an amazing built-in code generator that saves you from writing repetitive boilerplate for new features.
+Once your application is created, `create-node-app` provides an amazing built-in code generator that saves you from writing repetitive boilerplate for new features.
 
 To generate a new service (e.g., for `user` management), navigate into your project folder and run:
 
@@ -111,6 +111,6 @@ Contributions, issues, and feature requests are always welcome! Feel free to che
 
 ## 📄 License
 
-This project is [ISC](https://opensource.org/licenses/ISC) licensed. 
+This project is licensed under the [ISC License](LICENSE).
 
 **Created with ❤️ by [Krish Dhiman](https://github.com/KrishDhimanOfficial)**
