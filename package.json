@@ -1,12 +1,12 @@
 {
-    "name": "create-node-app",
-    "version": "1.1.2",
-    "description": "A CLI tool to scaffold Node.js applications.",
+    "name": "express-forge-modular",
+    "version": "1.2.0",
+    "description": "A CLI tool to scaffold Express.js applications.",
     "main": "index.js",
     "type": "module",
     "private": false,
     "bin": {
-        "create-express-app": "bin/cli.js",
+        "express-forge-modular": "bin/cli.js",
         "create-service": "bin/create-service-cli.js"
     },
     "scripts": {

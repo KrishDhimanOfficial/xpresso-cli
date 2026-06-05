@@ -1,6 +1,6 @@
-# 🚀 create-node-app
+# 🚀 express-forge-modular
 
-[![npm version](https://img.shields.io/npm/v/create-node-app.svg)](https://www.npmjs.com/package/create-node-app)
+[![npm version](https://img.shields.io/npm/v/express-forge-modular.svg)](https://www.npmjs.com/package/express-forge-modular)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
 A powerful, incredibly fast CLI tool to instantly scaffold production-ready Node.js Express applications. It comes packed with built-in database configurations and an intuitive modular service generator, saving you hours of boilerplate setup.
@@ -21,11 +21,23 @@ A powerful, incredibly fast CLI tool to instantly scaffold production-ready Node
 
 ### Step 1: Scaffold a New Application
 
-You don't need to install anything globally. You can create a new application instantly using `npx`.
+You can use `npx` to create a new application instantly without installing anything globally:
 
 ```bash
-npx create-node-app my-app
+npx express-forge-modular my-app
 ```
+
+**Alternatively, you can install the CLI globally:**
+
+```bash
+npm install -g express-forge-modular
+```
+
+Then you can use it directly anywhere:
+```bash
+express-forge-modular my-app
+```
+
 *(If you run the command without a folder name, the CLI will interactively ask you for it!)*
 
 ### Step 2: Configure Your Project
@@ -60,7 +72,7 @@ You now have a fully functional Node.js server running! 🎉
 
 ## 🏗️ Generating New Services (The Magic)
 
-Once your application is created, `create-node-app` provides an amazing built-in code generator that saves you from writing repetitive boilerplate for new features.
+Once your application is created, `express-forge-modular` provides an amazing built-in code generator that saves you from writing repetitive boilerplate for new features.
 
 To generate a new service (e.g., for `user` management), navigate into your project folder and run:
 
