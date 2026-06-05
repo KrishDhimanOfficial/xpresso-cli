@@ -1,12 +1,12 @@
 {
-    "name": "express-forge-modular",
-    "version": "1.2.0",
+    "name": "xpresso-cli",
+    "version": "1.3.0",
     "description": "A CLI tool to scaffold Express.js applications.",
     "main": "index.js",
     "type": "module",
     "private": false,
     "bin": {
-        "express-forge-modular": "bin/cli.js",
+        "xpresso-cli": "bin/cli.js",
         "create-service": "bin/create-service-cli.js"
     },
     "scripts": {
