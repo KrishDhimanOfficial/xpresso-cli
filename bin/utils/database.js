@@ -38,7 +38,7 @@ const connectDB = async () => {
 export default connectDB`;
         fs.writeFileSync(dbConfigPath, mongooseContent);
 
-    } else if (database === 'PostgreSQL (Sequelize)') {
+    } else if (database === 'PostgreSQL (Sequelize)' || database === 'MySQL (Sequelize)') {
         pkg.dependencies = pkg.dependencies || {};
         pkg.dependencies.sequelize = '^6.35.0';
         pkg.dependencies.pg = '^8.11.3';

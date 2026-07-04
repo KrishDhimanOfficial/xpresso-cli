@@ -32,7 +32,7 @@ export async function promptUser(projectDirectory) {
             type: 'list',
             name: 'database',
             message: 'Which database would you like to use?',
-            choices: ['MongoDB (Mongoose)', 'PostgreSQL (Sequelize)', 'None'],
+            choices: ['MongoDB (Mongoose)', 'PostgreSQL (Sequelize)', 'MySQL (Sequelize)', 'None'],
             default: 'MongoDB (Mongoose)'
         }
     ]);

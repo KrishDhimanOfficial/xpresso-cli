@@ -11,10 +11,10 @@ export async function createServiceCommand(serviceName, targetDir = process.cwd(
 
     const currentDir = targetDir;
     const packageJsonPath = path.join(currentDir, 'package.json');
-    
+
     // Default to no database if not found
-    let dbType = 'none'; 
-    
+    let dbType = 'none';
+
     if (fs.existsSync(packageJsonPath)) {
         try {
             const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
@@ -31,18 +31,13 @@ export async function createServiceCommand(serviceName, targetDir = process.cwd(
         console.warn(chalk.yellow('No package.json found in current directory. Generating service without database dependencies.'));
     }
 
-    const serviceDir = path.join(currentDir, 'services', serviceName);
-    const controllerDir = path.join(serviceDir, 'controller');
-    const modelDir = path.join(serviceDir, 'model');
-    const routesDir = path.join(serviceDir, 'routes');
+    const serviceDir = path.join(currentDir, 'modules', serviceName);
 
     const spinner = ora(`Generating ${serviceName} service...`).start();
 
     try {
-        // Create directories
-        fs.mkdirSync(controllerDir, { recursive: true });
-        fs.mkdirSync(modelDir, { recursive: true });
-        fs.mkdirSync(routesDir, { recursive: true });
+        // Create directory
+        fs.mkdirSync(serviceDir, { recursive: true });
 
         // Generate Controller
         const controllerContent = `export default {
@@ -50,11 +45,11 @@ export async function createServiceCommand(serviceName, targetDir = process.cwd(
     // exampleMethod: async (req, res, next) => { ... }
 }
 `;
-        fs.writeFileSync(path.join(controllerDir, `${serviceName}.controller.js`), controllerContent);
+        fs.writeFileSync(path.join(serviceDir, `${serviceName}.controller.js`), controllerContent);
 
         // Generate Routes
         const routesContent = `import express from 'express'
-import ${serviceName}Controller from '../controller/${serviceName}.controller.js'
+import ${serviceName}Controller from './${serviceName}.controller.js'
 
 const router = express.Router({ caseSensitive: true })
 
@@ -63,13 +58,13 @@ const router = express.Router({ caseSensitive: true })
 
 export default router
 `;
-        fs.writeFileSync(path.join(routesDir, `${serviceName}.routes.js`), routesContent);
+        fs.writeFileSync(path.join(serviceDir, `${serviceName}.routes.js`), routesContent);
 
         // Generate Model
         let modelContent = '';
         if (dbType === 'sequelize') {
             modelContent = `import { DataTypes } from 'sequelize'
-import sequelize from '../../../config/db.config.js'
+import sequelize from '../../config/db.config.js'
 
 const ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)} = sequelize.define('${serviceName}', {
     name: {
@@ -93,15 +88,15 @@ const ${serviceName}Schema = new mongoose.Schema({
 export default mongoose.model('${serviceName}', ${serviceName}Schema);
 `;
         }
-        
-        fs.writeFileSync(path.join(modelDir, `${serviceName}.model.js`), modelContent);
+
+        fs.writeFileSync(path.join(serviceDir, `${serviceName}.model.js`), modelContent);
 
         // Try to update app.js automatically
         const appJsPath = path.join(currentDir, 'app.js');
         if (fs.existsSync(appJsPath)) {
             let appJsContent = fs.readFileSync(appJsPath, 'utf8');
 
-            const importStatement = `import ${serviceName}Routes from './services/${serviceName}/routes/${serviceName}.routes.js'`;
+            const importStatement = `import ${serviceName}Routes from './modules/${serviceName}/${serviceName}.routes.js'`;
             const useStatement = `app.use('/api/${serviceName}', ${serviceName}Routes)`;
 
             // Inject import statement after the last import
@@ -133,9 +128,9 @@ export default mongoose.model('${serviceName}', ${serviceName}Schema);
             fs.writeFileSync(appJsPath, appJsContent);
             spinner.succeed(`Successfully created ${chalk.green(serviceName)} service and updated app.js`);
         } else {
-            spinner.succeed(`Successfully created ${chalk.green(serviceName)} service at ./services/${serviceName}`);
+            spinner.succeed(`Successfully created ${chalk.green(serviceName)} service at ./modules/${serviceName}`);
             console.log(`\nDon't forget to register your routes in ${chalk.cyan('app.js')}!`);
-            console.log(`  import ${serviceName}Routes from './services/${serviceName}/routes/${serviceName}.routes.js'`);
+            console.log(`  import ${serviceName}Routes from './modules/${serviceName}/${serviceName}.routes.js'`);
             console.log(`  app.use('/api/${serviceName}', ${serviceName}Routes)\n`);
         }
 
