@@ -24,13 +24,13 @@ app.use(compression(
   }
 ))
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'public')))
+app.use('/public', express.static(path.join(__dirname, 'public')))
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 app.get('/', (req, res) => {
-  return res.send('Hello World!')
+  return res.status(200).sendFile(path.join(__dirname, 'template', 'welcome.template.html'))
 })
 
 // error handler
 app.use(globalErrorHandler)
-
 export default app

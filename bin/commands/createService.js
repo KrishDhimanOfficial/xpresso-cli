@@ -40,11 +40,13 @@ export async function createServiceCommand(serviceName, targetDir = process.cwd(
         fs.mkdirSync(serviceDir, { recursive: true });
 
         // Generate Controller
-        const controllerContent = `export default {
+        const controllerContent = `import ${serviceName}Model from './${serviceName}.model.js';
+
+export default {
     // Add your controller methods here
     // exampleMethod: async (req, res, next) => { ... }
 }
-`;
+        `;
         fs.writeFileSync(path.join(serviceDir, `${serviceName}.controller.js`), controllerContent);
 
         // Generate Routes
@@ -126,9 +128,9 @@ export default mongoose.model('${serviceName}', ${serviceName}Schema);
             }
 
             fs.writeFileSync(appJsPath, appJsContent);
-            spinner.succeed(`Successfully created ${chalk.green(serviceName)} service and updated app.js`);
+            spinner.succeed(`Successfully created ${chalk.green(serviceName)} module and updated app.js`);
         } else {
-            spinner.succeed(`Successfully created ${chalk.green(serviceName)} service at ./modules/${serviceName}`);
+            spinner.succeed(`Successfully created ${chalk.green(serviceName)} Module at ./modules/${serviceName}`);
             console.log(`\nDon't forget to register your routes in ${chalk.cyan('app.js')}!`);
             console.log(`  import ${serviceName}Routes from './modules/${serviceName}/${serviceName}.routes.js'`);
             console.log(`  app.use('/api/${serviceName}', ${serviceName}Routes)\n`);

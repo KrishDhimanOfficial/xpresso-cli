@@ -25,7 +25,7 @@ export async function promptUser(projectDirectory) {
             type: 'list',
             name: 'packageManager',
             message: 'Which package manager would you like to use?',
-            choices: ['npm', 'yarn', 'pnpm'],
+            choices: ['npm', 'yarn', 'pnpm', 'bun'],
             default: 'npm'
         },
         {
@@ -74,7 +74,42 @@ export function copyTemplateFiles(templateDir, targetPath) {
     }
 }
 
+/** Returns true if the given CLI binary is available on PATH. */
+function isCommandAvailable(cmd) {
+    try {
+        execSync(
+            process.platform === 'win32' ? `where ${cmd}` : `command -v ${cmd}`,
+            { stdio: 'pipe' }
+        );
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+/** Install URLs shown when a package manager binary is missing. */
+const INSTALL_URLS = {
+    bun:  'https://bun.sh',
+    pnpm: 'https://pnpm.io/installation',
+    yarn: 'https://yarnpkg.com/getting-started/install',
+    npm:  'https://nodejs.org',
+};
+
 export function installDependencies(targetPath, packageManager) {
+    // Pre-flight: check the binary actually exists on PATH
+    if (!isCommandAvailable(packageManager)) {
+        console.log(
+            chalk.yellow(`\n⚠  ${packageManager} is not installed on this machine.`)
+        );
+        console.log(
+            chalk.dim(`   Install it from: ${INSTALL_URLS[packageManager] ?? 'https://nodejs.org'}`)
+        );
+        console.log(
+            chalk.dim(`   Then run: ${chalk.cyan(`cd ${path.basename(targetPath)} && ${packageManager} install`)}\n`)
+        );
+        return; // Skip install — scaffold still succeeds
+    }
+
     const installSpinner = ora(`Installing dependencies using ${packageManager}...`).start();
     try {
         execSync(`${packageManager} install`, { cwd: targetPath, stdio: 'pipe' });

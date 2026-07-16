@@ -3,126 +3,191 @@
 [![npm version](https://img.shields.io/npm/v/xpresso-cli.svg)](https://www.npmjs.com/package/xpresso-cli)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
-A powerful, incredibly fast CLI tool to instantly scaffold production-ready Node.js Express applications. It comes packed with built-in database configurations and an intuitive modular service generator, saving you hours of boilerplate setup.
+A powerful, blazing-fast CLI tool to instantly scaffold production-ready **Node.js + Express** applications. Choose your package manager, pick your database, and get a clean modular structure — all in seconds.
 
 ---
 
 ## ✨ Features
 
-- **⚡ Instant Setup:** Scaffolds a complete, production-ready Express.js MVC/Modular server structure in seconds.
-- **🗄️ Database Ready:** Automatic, hassle-free database setup for **MongoDB (Mongoose)** or **PostgreSQL (Sequelize)**.
-- **🛠️ Service Generator:** Built-in CLI command to automatically generate new service modules (Controllers, Models, Routes) instantly.
-- **🔒 Best Practices Built-in:** Pre-configured `app.js` with CORS, compression, and global error handlers.
-- **📦 Package Manager Choice:** Support for `npm`, `yarn`, and `pnpm`.
+- **⚡ Instant Scaffold** — Full production-ready Express MVC structure in one command.
+- **🗄️ Multi-Database Support** — MongoDB (Mongoose), MySQL (Sequelize), PostgreSQL (Sequelize), or None.
+- **📦 4 Package Managers** — Choose from `npm`, `yarn`, `pnpm`, or `bun`.
+- **🛠️ Module Generator** — `generate mod <name>` scaffolds a complete module and auto-wires it into `app.js`.
+- **🔒 Production Middleware** — CORS, gzip compression, cookie-parser, Morgan logging, and a global error handler — pre-configured.
+- **🔐 Auth Module** — A complete `auth` module (controller, routes, model) is generated automatically on every scaffold.
+- **📦 Native ESM** — `type: "module"` from day one. No Babel, no transpilation.
+- **✅ Smart Install Check** — If your chosen package manager isn't installed, the CLI warns you gracefully and skips install instead of crashing.
 
 ---
 
-## 📖 Step-by-Step Guide
+## 📖 Quick Start
 
-### Step 1: Scaffold a New Application
-
-You can use `npx` to create a new application instantly without installing anything globally:
+### Option A — Use without installing (recommended)
 
 ```bash
 npx xpresso-cli my-app
 ```
 
-**Alternatively, you can install the CLI globally:**
+### Option B — Install globally
 
 ```bash
 npm install -g xpresso-cli
 ```
 
-Then you can use it directly anywhere:
+Then run anywhere:
+
 ```bash
 xpresso-cli my-app
 ```
 
-*(If you run the command without a folder name, the CLI will interactively ask you for it!)*
+> 💡 Running the command without a folder name will interactively prompt you for one.
 
-### Step 2: Configure Your Project
+---
 
-The interactive CLI will prompt you to make a few quick decisions to tailor your app:
+## ⚙️ Interactive Setup
 
-1. **Package Manager:** Choose between `npm`, `yarn`, or `pnpm`.
-2. **Database:** Select your preferred database:
-   - `MongoDB` (uses Mongoose)
-   - `PostgreSQL` (uses Sequelize)
-   - `None` (if you want to set it up yourself later)
+The CLI will ask you two questions during scaffold:
 
-Once selected, the CLI will automatically:
-- Generate the folder structure.
-- Configure your database connection file.
-- Generate an initial `auth` service tailored to your database choice.
-- Install all necessary dependencies automatically!
+### 1. Package Manager
 
-### Step 3: Run Your Application
+```
+? Which package manager would you like to use?
+  ❯ npm
+    yarn
+    pnpm
+    bun
+```
 
-Navigate into your newly created project and start the development server:
+### 2. Database
+
+```
+? Which database would you like to use?
+  ❯ MongoDB (Mongoose)
+    PostgreSQL (Sequelize)
+    MySQL (Sequelize)
+    None
+```
+
+Once confirmed, the CLI will automatically:
+- Copy the Express template into your project folder
+- Configure the database connection file
+- Generate an `auth` module tailored to your chosen database
+- Install all dependencies using your chosen package manager
+
+> ⚠️ **Note:** If you selected `bun` or another package manager that isn't installed on your machine, the CLI will warn you with the install URL and skip the install step — the scaffold still completes successfully. Just run `<pm> install` manually afterward.
+
+---
+
+## 🚀 Running Your App
 
 ```bash
 cd my-app
-npm start
+npm run dev     # or: yarn dev / pnpm dev / bun run dev
 ```
-*(If you selected yarn or pnpm, use `yarn start` or `pnpm start` respectively).*
 
-You now have a fully functional Node.js server running! 🎉
+Your server starts on the configured port. Visit `http://localhost:<port>` to see the **live welcome page**.
 
 ---
 
-## 🏗️ Generating New Services (The Magic)
+## 🏗️ Module Generator
 
-Once your application is created, `xpresso-cli` provides an amazing built-in code generator that saves you from writing repetitive boilerplate for new features.
-
-To generate a new service (e.g., for `user` management), navigate into your project folder and run:
+Once inside your project, use the `generate` binary to scaffold new modules instantly:
 
 ```bash
-npx create-service user
+generate mod <moduleName>
 ```
-*(If you installed the CLI globally, you can simply type `create-service user`)*
 
-### What happens behind the scenes?
-When you run `create-service user`, the CLI automatically:
-1. Creates a Controller (`services/user/controller/user.controller.js`).
-2. Creates Routes (`services/user/routes/user.routes.js`).
-3. Creates a Model (`services/user/model/user.model.js`) specifically tailored to the database you selected during initial setup!
-4. **Auto-wires everything:** It automatically updates your main `app.js` file to import and register your new `user` routes. You don't have to touch a thing!
+**Example:**
+
+```bash
+generate mod product
+generate mod order
+generate mod user
+```
+
+### What gets created
+
+For `generate mod product`, the CLI creates:
+
+```
+modules/
+└── product/
+    ├── product.controller.js   # Controller with model import
+    ├── product.routes.js       # Express router
+    └── product.model.js        # DB model (Mongoose or Sequelize schema)
+```
+
+And **automatically updates `app.js`** with:
+
+```js
+import productRoutes from './modules/product/product.routes.js'
+app.use('/api/product', productRoutes)
+```
+
+No manual wiring needed.
 
 ---
 
-## 📂 Folder Structure
-
-Here is the clean, modular structure generated for your app:
+## 📂 Project Structure
 
 ```text
 my-app/
 ├── bin/
-│   └── www                    # Server startup script
+│   └── www                      # Server startup script
 ├── config/
-│   └── db.config.js           # Database connection setup
-├── public/                    # Static files
-├── services/
-│   ├── auth/                  # Automatically generated on init
-│   │   ├── controller/
-│   │   ├── model/
-│   │   └── routes/
-│   └── <your-service>/        # Automatically generated via 'create-service'
+│   └── db.config.js             # Database connection (auto-configured)
+├── middleware/                  # Custom middleware
+├── modules/
+│   ├── auth/                    # Auto-generated on scaffold
+│   │   ├── auth.controller.js
+│   │   ├── auth.routes.js
+│   │   └── auth.model.js
+│   └── <your-module>/           # Generated via `generate mod <name>`
+│       ├── <name>.controller.js
+│       ├── <name>.routes.js
+│       └── <name>.model.js
+├── public/                      # Static assets (served at /public)
+├── uploads/                     # Uploaded files (served at /uploads)
 ├── utils/
-│   └── helper.utils.js        # Helper functions and utilities
-├── app.js                     # Express app configuration (auto-updated with new routes)
-└── package.json               # Project dependencies and scripts
+│   ├── helper.utils.js          # Global error handler & helpers
+│   └── removeFile.utils.js      # File cleanup utility
+├── app.js                       # Express app (auto-updated with new routes)
+└── package.json
+```
+
+---
+
+## 🧰 CLI Reference
+
+### `xpresso-cli [project-directory]`
+
+Scaffold a new Express application.
+
+```bash
+xpresso-cli my-app
+# or interactively:
+xpresso-cli
+```
+
+### `generate mod <moduleName>`
+
+Scaffold a new module inside an existing project.
+
+```bash
+generate mod user
+generate mod product
 ```
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are always welcome! Feel free to check the [issues page](https://github.com/KrishDhimanOfficial/create_node_app/issues).
+Contributions, issues, and feature requests are welcome! Check the [issues page](https://github.com/KrishDhimanOfficial/xpresso-cli/issues).
 
 ---
 
 ## 📄 License
 
-This project is licensed under the [ISC License](LICENSE).
+Licensed under the [ISC License](LICENSE).
 
 **Created with ❤️ by [Krish Dhiman](https://github.com/KrishDhimanOfficial)**

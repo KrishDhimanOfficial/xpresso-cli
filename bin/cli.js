@@ -18,9 +18,9 @@ program
     .action(initCommand);
 
 program
-    .command('create-service <serviceName>')
-    .alias('create')
-    .description('Scaffold a new service (model, controller, routes)')
-    .action(createServiceCommand);
+    .command('generate mod <moduleName>')
+    .alias('gen')
+    .description('Scaffold a new module (model, controller, routes)')
+    .action((moduleName) => createServiceCommand(moduleName));
 
 program.parse(process.argv);

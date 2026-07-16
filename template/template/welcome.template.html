@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Your Express.js app is live — scaffolded by Xpresso-CLI with a clean modular architecture."
+    />
+    <title>Welcome — Xpresso CLI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ─── Reset & Tokens ─────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --c-bg:          #08090d;
+        --c-surface:     rgba(255,255,255,.04);
+        --c-surface-hov: rgba(255,255,255,.07);
+        --c-border:      rgba(255,255,255,.08);
+        --c-border-hov:  rgba(255,255,255,.18);
+
+        --c-accent:      #7c5cfc;
+        --c-accent-2:    #e040fb;
+        --c-green:       #00e5a0;
+        --c-amber:       #fbbf24;
+
+        --c-text:        #e8eaf0;
+        --c-muted:       rgba(232,234,240,.45);
+
+        --radius-md:     12px;
+        --radius-lg:     20px;
+        --radius-xl:     28px;
+
+        --font-sans:     'Inter', system-ui, sans-serif;
+        --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
+
+        --ease-spring:   cubic-bezier(.34,1.56,.64,1);
+        --ease-smooth:   cubic-bezier(.25,.46,.45,.94);
+      }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        font-family: var(--font-sans);
+        background: var(--c-bg);
+        color: var(--c-text);
+        min-height: 100vh;
+        overflow-x: hidden;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ─── Background Canvas ─────────────────────────────── */
+      .bg-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(120px);
+        opacity: 0;
+        animation: orbFloat 12s var(--ease-smooth) forwards;
+      }
+
+      .orb-1 {
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, #7c5cfc55, transparent 70%);
+        top: -15%; left: -10%;
+        animation-delay: 0.2s;
+      }
+      .orb-2 {
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, #e040fb44, transparent 70%);
+        top: 20%; right: -10%;
+        animation-delay: 0.5s;
+        animation-duration: 14s;
+      }
+      .orb-3 {
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, #00e5a033, transparent 70%);
+        bottom: 10%; left: 30%;
+        animation-delay: 0.8s;
+        animation-duration: 16s;
+      }
+
+      @keyframes orbFloat {
+        0%   { opacity: 0; transform: translateY(40px) scale(.9); }
+        20%  { opacity: 1; }
+        50%  { transform: translateY(-20px) scale(1.05); }
+        100% { opacity: .7; transform: translateY(0) scale(1); }
+      }
+
+      /* Grid overlay */
+      .bg-grid {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-image:
+          linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%);
+      }
+
+      /* ─── Layout ─────────────────────────────────────────── */
+      .container {
+        position: relative;
+        z-index: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      section { padding: 80px 0; }
+
+      /* ─── Navbar ─────────────────────────────────────────── */
+      .navbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 100;
+        padding: 14px 0;
+        background: rgba(8,9,13,.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--c-border);
+        animation: slideDown .6s var(--ease-smooth) both;
+      }
+
+      @keyframes slideDown {
+        from { transform: translateY(-100%); opacity: 0; }
+        to   { transform: translateY(0);     opacity: 1; }
+      }
+
+      .navbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: -.3px;
+        text-decoration: none;
+        color: var(--c-text);
+      }
+
+      .logo-icon {
+        width: 30px; height: 30px;
+        background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: .75rem;
+        font-weight: 800;
+        color: #fff;
+      }
+
+      .nav-badge {
+        font-size: .7rem;
+        font-family: var(--font-mono);
+        padding: 3px 10px;
+        border-radius: 100px;
+        background: rgba(124,92,252,.15);
+        border: 1px solid rgba(124,92,252,.3);
+        color: #a78bfa;
+        letter-spacing: .5px;
+      }
+
+      /* ─── Hero ───────────────────────────────────────────── */
+      .hero {
+        padding-top: 160px;
+        padding-bottom: 100px;
+        text-align: center;
+      }
+
+      .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: .78rem;
+        font-family: var(--font-mono);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--c-green);
+        background: rgba(0,229,160,.08);
+        border: 1px solid rgba(0,229,160,.2);
+        padding: 6px 16px;
+        border-radius: 100px;
+        margin-bottom: 32px;
+        animation: fadeUp .7s .2s var(--ease-smooth) both;
+      }
+
+      .dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--c-green);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: .5; transform: scale(.7); }
+      }
+
+      .hero h1 {
+        font-size: clamp(2.6rem, 6vw, 5rem);
+        font-weight: 800;
+        letter-spacing: -2px;
+        line-height: 1.07;
+        margin-bottom: 24px;
+        animation: fadeUp .7s .35s var(--ease-smooth) both;
+      }
+
+      .gradient-text {
+        background: linear-gradient(135deg, #a78bfa 0%, #e040fb 50%, #7c5cfc 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-size: 200% auto;
+        animation: shimmer 4s linear infinite;
+      }
+
+      @keyframes shimmer {
+        0%   { background-position: 0% center; }
+        100% { background-position: 200% center; }
+      }
+
+      .hero p {
+        font-size: 1.15rem;
+        color: var(--c-muted);
+        max-width: 560px;
+        margin: 0 auto 44px;
+        line-height: 1.75;
+        animation: fadeUp .7s .5s var(--ease-smooth) both;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        animation: fadeUp .7s .65s var(--ease-smooth) both;
+      }
+
+      /* ─── Buttons ────────────────────────────────────────── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 13px 28px;
+        border-radius: var(--radius-md);
+        font-size: .92rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        text-decoration: none;
+        transition: transform .2s var(--ease-spring), box-shadow .2s ease, background .2s ease;
+        will-change: transform;
+      }
+
+      .btn:hover  { transform: translateY(-2px); }
+      .btn:active { transform: translateY(0) scale(.97); }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+        color: #fff;
+        box-shadow: 0 4px 24px rgba(124,92,252,.35);
+      }
+      .btn-primary:hover { box-shadow: 0 8px 32px rgba(124,92,252,.5); }
+
+      .btn-ghost {
+        background: var(--c-surface);
+        color: var(--c-text);
+        border: 1px solid var(--c-border);
+        backdrop-filter: blur(12px);
+      }
+      .btn-ghost:hover {
+        background: var(--c-surface-hov);
+        border-color: var(--c-border-hov);
+      }
+
+      /* ─── Terminal Card ──────────────────────────────────── */
+      .terminal-wrap {
+        padding: 0 0 80px;
+        animation: fadeUp .8s .8s var(--ease-smooth) both;
+      }
+
+      .terminal {
+        max-width: 720px;
+        margin: 0 auto;
+        background: rgba(12,13,20,.9);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset;
+        backdrop-filter: blur(20px);
+      }
+
+      .terminal-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--c-border);
+        background: rgba(255,255,255,.02);
+      }
+
+      .term-dot {
+        width: 12px; height: 12px;
+        border-radius: 50%;
+      }
+      .term-dot.red    { background: #ff5f57; }
+      .term-dot.yellow { background: #febc2e; }
+      .term-dot.green  { background: #28c840; }
+
+      .term-title {
+        margin-left: auto;
+        font-size: .72rem;
+        font-family: var(--font-mono);
+        color: var(--c-muted);
+      }
+
+      .terminal-body {
+        padding: 24px 28px;
+        font-family: var(--font-mono);
+        font-size: .82rem;
+        line-height: 1.9;
+      }
+
+      .tl { display: block; }
+      .tl-prompt { color: var(--c-green); }
+      .tl-cmd    { color: #e8eaf0; }
+      .tl-out    { color: var(--c-muted); }
+      .tl-success { color: var(--c-green); }
+      .tl-accent  { color: #a78bfa; }
+      .tl-cursor {
+        display: inline-block;
+        width: 8px; height: 16px;
+        background: var(--c-green);
+        border-radius: 2px;
+        vertical-align: middle;
+        animation: blink .9s step-end infinite;
+        margin-left: 2px;
+      }
+
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0; }
+      }
+
+      /* ─── Stats Row ──────────────────────────────────────── */
+      .stats-row {
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+        flex-wrap: wrap;
+        padding: 48px 0;
+        border-top: 1px solid var(--c-border);
+        border-bottom: 1px solid var(--c-border);
+        margin-top: 20px;
+      }
+
+      .stat {
+        text-align: center;
+        opacity: 0;
+        animation: fadeUp .6s var(--ease-smooth) forwards;
+      }
+      .stat:nth-child(1) { animation-delay: .9s; }
+      .stat:nth-child(2) { animation-delay: 1.05s; }
+      .stat:nth-child(3) { animation-delay: 1.2s; }
+      .stat:nth-child(4) { animation-delay: 1.35s; }
+
+      .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        background: linear-gradient(135deg, var(--c-accent), var(--c-accent-2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .stat-label {
+        font-size: .78rem;
+        color: var(--c-muted);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+      }
+
+      /* ─── Features Grid ──────────────────────────────────── */
+      .section-label {
+        font-size: .72rem;
+        font-family: var(--font-mono);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--c-accent);
+        margin-bottom: 16px;
+        display: block;
+      }
+
+      .section-title {
+        font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+        font-weight: 800;
+        letter-spacing: -1px;
+        line-height: 1.15;
+        margin-bottom: 16px;
+      }
+
+      .section-sub {
+        font-size: 1rem;
+        color: var(--c-muted);
+        max-width: 500px;
+        line-height: 1.7;
+        margin-bottom: 56px;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+      }
+
+      .feature-card {
+        background: var(--c-surface);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        transition:
+          transform .3s var(--ease-spring),
+          border-color .3s ease,
+          background .3s ease,
+          box-shadow .3s ease;
+        cursor: default;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(124,92,252,.06), transparent 60%);
+        opacity: 0;
+        transition: opacity .3s ease;
+        pointer-events: none;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(124,92,252,.3);
+        background: var(--c-surface-hov);
+        box-shadow: 0 16px 48px rgba(0,0,0,.4), 0 0 0 1px rgba(124,92,252,.1);
+      }
+
+      .feature-card:hover::before { opacity: 1; }
+
+      .feature-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 1.3rem;
+        margin-bottom: 18px;
+      }
+
+      .feature-icon.purple { background: rgba(124,92,252,.15); }
+      .feature-icon.pink   { background: rgba(224,64,251,.12); }
+      .feature-icon.green  { background: rgba(0,229,160,.1); }
+      .feature-icon.amber  { background: rgba(251,191,36,.1); }
+      .feature-icon.blue   { background: rgba(56,189,248,.1); }
+      .feature-icon.red    { background: rgba(248,113,113,.1); }
+
+      .feature-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .feature-desc {
+        font-size: .875rem;
+        color: var(--c-muted);
+        line-height: 1.65;
+      }
+
+      /* ─── Commands Showcase ──────────────────────────────── */
+      .commands-section {
+        background: rgba(255,255,255,.015);
+        border-top: 1px solid var(--c-border);
+        border-bottom: 1px solid var(--c-border);
+      }
+
+      .commands-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+      }
+
+      .cmd-card {
+        background: rgba(12,13,20,.8);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-md);
+        padding: 20px 22px;
+        transition: border-color .25s ease, transform .25s var(--ease-spring);
+      }
+
+      .cmd-card:hover {
+        border-color: rgba(124,92,252,.35);
+        transform: translateY(-2px);
+      }
+
+      .cmd-name {
+        font-family: var(--font-mono);
+        font-size: .82rem;
+        color: var(--c-green);
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+
+      .cmd-desc {
+        font-size: .82rem;
+        color: var(--c-muted);
+      }
+
+      /* ─── Choice Cards (PM / DB) ──────────────────────────── */
+      .choice-grid {
+        display: grid;
+        gap: 14px;
+      }
+      .choice-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+      .choice-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+
+      .choice-card {
+        background: var(--c-surface);
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius-md);
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: transform .25s var(--ease-spring), border-color .25s ease, box-shadow .25s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .choice-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--card-glow, rgba(124,92,252,.06));
+        opacity: 0;
+        transition: opacity .3s ease;
+        pointer-events: none;
+      }
+
+      .choice-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--card-accent, rgba(124,92,252,.35));
+        box-shadow: 0 12px 32px rgba(0,0,0,.35);
+      }
+      .choice-card:hover::after { opacity: 1; }
+
+      .choice-icon {
+        font-size: 1.6rem;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+
+      .choice-info { flex: 1; min-width: 0; }
+      .choice-name {
+        font-weight: 600;
+        font-size: .92rem;
+        margin-bottom: 2px;
+      }
+      .choice-tag {
+        font-size: .72rem;
+        font-family: var(--font-mono);
+        color: var(--c-muted);
+      }
+
+      /* PM colours */
+      .pm-npm  { --card-accent: rgba(204,0,0,.35);       --card-glow: rgba(204,0,0,.06);       }
+      .pm-yarn { --card-accent: rgba(44,142,187,.35);    --card-glow: rgba(44,142,187,.06);    }
+      .pm-pnpm { --card-accent: rgba(247,152,29,.35);    --card-glow: rgba(247,152,29,.06);    }
+      .pm-bun  { --card-accent: rgba(251,191,36,.35);    --card-glow: rgba(251,191,36,.06);    }
+
+      /* DB colours */
+      .db-mongo  { --card-accent: rgba(0,229,160,.3);     --card-glow: rgba(0,229,160,.06);    }
+      .db-mysql  { --card-accent: rgba(0,127,169,.35);    --card-glow: rgba(0,127,169,.06);    }
+      .db-pg     { --card-accent: rgba(51,103,145,.35);   --card-glow: rgba(51,103,145,.06);   }
+      .db-none   { --card-accent: rgba(255,255,255,.15);  --card-glow: rgba(255,255,255,.03);  }
+
+      /* Two-column offer layout */
+      .offer-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        align-items: start;
+      }
+
+      .offer-block-title {
+        font-size: .72rem;
+        font-family: var(--font-mono);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--c-accent);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .offer-block-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--c-border);
+      }
+
+      /* Stack Badges ─────────────────────────────────────────── */
+      .stack-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 32px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 16px;
+        border-radius: 100px;
+        font-size: .78rem;
+        font-weight: 500;
+        border: 1px solid;
+        transition: transform .2s var(--ease-spring), box-shadow .2s ease;
+      }
+
+      .badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,.3);
+      }
+
+      .badge.express  { background: rgba(56,189,248,.08); border-color: rgba(56,189,248,.25); color: #7dd3fc; }
+      .badge.mongo    { background: rgba(0,229,160,.08);  border-color: rgba(0,229,160,.25);  color: #6ee7b7; }
+      .badge.jwt      { background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.25); color: #fde68a; }
+      .badge.node     { background: rgba(134,239,172,.08);border-color: rgba(134,239,172,.25);color: #86efac; }
+      .badge.cors     { background: rgba(124,92,252,.1);  border-color: rgba(124,92,252,.3);  color: #a78bfa; }
+      .badge.compress { background: rgba(248,113,113,.08);border-color: rgba(248,113,113,.25);color: #fca5a5; }
+
+      /* Responsive offer grid */
+      @media (max-width: 800px) {
+        .offer-split           { grid-template-columns: 1fr; gap: 36px; }
+        .choice-grid.cols-4    { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 480px) {
+        .choice-grid.cols-4,
+        .choice-grid.cols-2    { grid-template-columns: 1fr; }
+      }
+
+      /* ─── Footer ─────────────────────────────────────────── */
+      .footer {
+        text-align: center;
+        padding: 60px 0;
+        border-top: 1px solid var(--c-border);
+        color: var(--c-muted);
+        font-size: .8rem;
+      }
+
+      .footer-logo {
+        font-size: 1.3rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #a78bfa, #e040fb);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: block;
+        margin-bottom: 12px;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin: 20px 0;
+      }
+
+      .footer-links a {
+        color: var(--c-muted);
+        text-decoration: none;
+        font-size: .82rem;
+        transition: color .2s ease;
+      }
+      .footer-links a:hover { color: var(--c-text); }
+
+      /* ─── Scroll Reveal ──────────────────────────────────── */
+      .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition: opacity .7s var(--ease-smooth), transform .7s var(--ease-smooth);
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: none;
+      }
+
+      /* ─── Utility Animations ─────────────────────────────── */
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(22px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ─── Responsive ─────────────────────────────────────── */
+      @media (max-width: 640px) {
+        .stats-row  { gap: 36px; }
+        .hero       { padding-top: 130px; }
+        section     { padding: 60px 0; }
+        .terminal-body { font-size: .75rem; padding: 18px 18px; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Background -->
+    <div class="bg-canvas" aria-hidden="true">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="bg-grid" aria-hidden="true"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+      <div class="navbar-inner">
+        <a href="#" class="logo" id="logo-link">
+          <span class="logo-icon">X</span>
+          Xpresso CLI
+        </a>
+        <span class="nav-badge">v1.3.2</span>
+      </div>
+    </nav>
+
+    <!-- ── Hero ──────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-eyebrow">
+          <span class="dot"></span>
+          Server Running Successfully
+        </div>
+
+        <h1>
+          Your App is<br />
+          <span class="gradient-text">Live & Ready</span>
+        </h1>
+
+        <p>
+          Your Express.js application was scaffolded by Xpresso CLI —
+          a clean modular architecture, pre-configured middleware,
+          and production-ready boilerplate, all set up in seconds.
+        </p>
+
+        <div class="hero-actions">
+          <a href="https://github.com/KrishDhimanOfficial/xpresso-cli" id="btn-github" class="btn btn-primary" target="_blank" rel="noopener">
+            ★ &nbsp;Star on GitHub
+          </a>
+          <a href="https://www.npmjs.com/package/xpresso-cli" id="btn-npm" class="btn btn-ghost" target="_blank" rel="noopener">
+            npm →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Terminal ───────────────────────────────────────── -->
+    <div class="terminal-wrap">
+      <div class="container">
+        <div class="terminal" id="terminal-demo" role="region" aria-label="Terminal demo">
+          <div class="terminal-header">
+            <span class="term-dot red"  aria-hidden="true"></span>
+            <span class="term-dot yellow" aria-hidden="true"></span>
+            <span class="term-dot green" aria-hidden="true"></span>
+            <span class="term-title">zsh — xpresso-cli</span>
+          </div>
+          <div class="terminal-body" aria-label="Terminal output">
+            <span class="tl">
+              <span class="tl-prompt">~ </span>
+              <span class="tl-cmd">npx xpresso-cli my-app</span>
+            </span>
+            <span class="tl tl-out">? Which package manager? <span class="tl-accent">npm</span></span>
+            <span class="tl tl-out">? Which database? <span class="tl-accent">MongoDB (Mongoose)</span></span>
+            <span class="tl"> </span>
+            <span class="tl tl-out">Creating a new Node.js app in <span class="tl-accent">./my-app</span></span>
+            <span class="tl tl-success">✔ Template copied successfully.</span>
+            <span class="tl tl-success">✔ Auth service bootstrapped.</span>
+            <span class="tl tl-success">✔ Dependencies installed.</span>
+            <span class="tl"> </span>
+            <span class="tl tl-out">🚀 Success! <span class="tl-accent">cd my-app &amp;&amp; npm run dev</span></span>
+            <span class="tl"> </span>
+            <span class="tl">
+              <span class="tl-prompt">my-app </span>
+              <span class="tl-cmd">generate mod product</span>
+            </span>
+            <span class="tl tl-success">✔ Created <span class="tl-accent">product</span> module and updated app.js</span>
+            <span class="tl"> </span>
+            <span class="tl">
+              <span class="tl-prompt">my-app </span>
+              <span class="tl-cursor" aria-label="cursor"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Stats ──────────────────────────────────────────── -->
+    <div class="container">
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-number">~5s</div>
+          <div class="stat-label">To scaffold</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">MVC</div>
+          <div class="stat-label">Architecture</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">3</div>
+          <div class="stat-label">DB adapters</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">ESM</div>
+          <div class="stat-label">Native modules</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── What We Offer ─────────────────────────────────── -->
+    <section id="features">
+      <div class="container">
+        <div class="reveal">
+          <span class="section-label">// What we offer</span>
+          <h2 class="section-title">Everything You Need,<br/>Nothing You Don't</h2>
+          <p class="section-sub">
+            Every choice you made during scaffold is wired in and ready.
+            Pick your stack, generate modules, and ship.
+          </p>
+        </div>
+
+        <!-- Package Managers + Databases side-by-side -->
+        <div class="offer-split reveal">
+
+          <!-- Package Managers -->
+          <div>
+            <div class="offer-block-title">Package managers</div>
+            <div class="choice-grid cols-2">
+              <div class="choice-card pm-npm" id="offer-npm">
+                <span class="choice-icon">📦</span>
+                <div class="choice-info">
+                  <div class="choice-name">npm</div>
+                  <div class="choice-tag">node default</div>
+                </div>
+              </div>
+              <div class="choice-card pm-yarn" id="offer-yarn">
+                <span class="choice-icon">🧶</span>
+                <div class="choice-info">
+                  <div class="choice-name">Yarn</div>
+                  <div class="choice-tag">fast &amp; reliable</div>
+                </div>
+              </div>
+              <div class="choice-card pm-pnpm" id="offer-pnpm">
+                <span class="choice-icon">⚡</span>
+                <div class="choice-info">
+                  <div class="choice-name">pnpm</div>
+                  <div class="choice-tag">disk-efficient</div>
+                </div>
+              </div>
+              <div class="choice-card pm-bun" id="offer-bun">
+                <span class="choice-icon">🍞</span>
+                <div class="choice-info">
+                  <div class="choice-name">Bun</div>
+                  <div class="choice-tag">blazing fast</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Databases -->
+          <div>
+            <div class="offer-block-title">Databases</div>
+            <div class="choice-grid cols-2">
+              <div class="choice-card db-mongo" id="offer-mongo">
+                <span class="choice-icon">🍃</span>
+                <div class="choice-info">
+                  <div class="choice-name">MongoDB</div>
+                  <div class="choice-tag">via Mongoose</div>
+                </div>
+              </div>
+              <div class="choice-card db-mysql" id="offer-mysql">
+                <span class="choice-icon">🐬</span>
+                <div class="choice-info">
+                  <div class="choice-name">MySQL</div>
+                  <div class="choice-tag">via Sequelize</div>
+                </div>
+              </div>
+              <div class="choice-card db-pg" id="offer-pg">
+                <span class="choice-icon">🐘</span>
+                <div class="choice-info">
+                  <div class="choice-name">PostgreSQL</div>
+                  <div class="choice-tag">via Sequelize</div>
+                </div>
+              </div>
+              <div class="choice-card db-none" id="offer-nodb">
+                <span class="choice-icon">🚫</span>
+                <div class="choice-info">
+                  <div class="choice-name">No Database</div>
+                  <div class="choice-tag">pure API</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature cards below -->
+        <div class="features-grid reveal" style="margin-top: 48px;">
+          <article class="feature-card" id="feat-modular">
+            <div class="feature-icon purple">🧩</div>
+            <h3 class="feature-title">Modular Architecture</h3>
+            <p class="feature-desc">
+              Each feature lives in its own <code>modules/</code> folder with
+              dedicated <code>.controller.js</code>, <code>.routes.js</code>, and <code>.model.js</code>.
+            </p>
+          </article>
+
+          <article class="feature-card" id="feat-generate">
+            <div class="feature-icon red">🛠️</div>
+            <h3 class="feature-title">Code Generator</h3>
+            <p class="feature-desc">
+              Run <code>generate mod &lt;name&gt;</code> anywhere in your project.
+              Controller, routes, and model are created and auto-registered in <code>app.js</code>.
+            </p>
+          </article>
+
+          <article class="feature-card" id="feat-middleware">
+            <div class="feature-icon amber">⚡</div>
+            <h3 class="feature-title">Production Middleware</h3>
+            <p class="feature-desc">
+              CORS, gzip compression, cookie-parser, Morgan logging, and a
+              global error handler — all wired up and tuned by default.
+            </p>
+          </article>
+
+          <article class="feature-card" id="feat-esm">
+            <div class="feature-icon blue">📦</div>
+            <h3 class="feature-title">Native ESM</h3>
+            <p class="feature-desc">
+              <code>type: "module"</code> from day one. Clean <code>import/export</code>
+              syntax with no Babel, no transpilation, no config overhead.
+            </p>
+          </article>
+
+          <article class="feature-card" id="feat-auth">
+            <div class="feature-icon pink">🔐</div>
+            <h3 class="feature-title">Auth Bootstrapped</h3>
+            <p class="feature-desc">
+              A complete auth module is scaffolded automatically — signup, login,
+              and JWT patterns ready to extend from day one.
+            </p>
+          </article>
+
+          <article class="feature-card" id="feat-smartinstall">
+            <div class="feature-icon green">✅</div>
+            <h3 class="feature-title">Smart Install Check</h3>
+            <p class="feature-desc">
+              If your chosen package manager isn't installed, the CLI warns you
+              gracefully with the install URL — scaffold never fails.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Commands ───────────────────────────────────────── -->
+    <section class="commands-section" id="commands">
+      <div class="container">
+        <div class="reveal">
+          <span class="section-label">// CLI Commands</span>
+          <h2 class="section-title">What Can You Generate?</h2>
+          <p class="section-sub">Run these anywhere inside your project.</p>
+        </div>
+
+        <div class="commands-grid reveal">
+          <div class="cmd-card" id="cmd-generate">
+            <div class="cmd-name">generate mod &lt;name&gt;</div>
+            <p class="cmd-desc">Scaffold a complete module: controller, routes, and model — auto-registered in app.js.</p>
+          </div>
+          <div class="cmd-card" id="cmd-init">
+            <div class="cmd-name">xpresso-cli [project]</div>
+            <p class="cmd-desc">Bootstrap a full Express application from scratch with your preferred database.</p>
+          </div>
+          <div class="cmd-card" id="cmd-dev">
+            <div class="cmd-name">npm run dev</div>
+            <p class="cmd-desc">Start the development server with Nodemon for instant hot-reload on every file change.</p>
+          </div>
+          <div class="cmd-card" id="cmd-start">
+            <div class="cmd-name">npm start</div>
+            <p class="cmd-desc">Launch the server in production mode using the stable Node.js process runner.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Stack ──────────────────────────────────────────── -->
+    <section id="stack">
+      <div class="container">
+        <div class="reveal">
+          <span class="section-label">// Built With</span>
+          <h2 class="section-title">Your Stack, Ready to Scale</h2>
+          <p class="section-sub">
+            Best-in-class packages pre-selected, configured, and working together.
+          </p>
+        </div>
+
+        <div class="stack-wrap reveal">
+          <span class="badge express">⚡ Express.js</span>
+          <span class="badge mongo">🍃 Mongoose / Sequelize</span>
+          <span class="badge jwt">🔑 JSON Web Token</span>
+          <span class="badge node">🟢 Node.js ESM</span>
+          <span class="badge cors">🌐 CORS</span>
+          <span class="badge compress">🗜️ Compression</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Footer ─────────────────────────────────────────── -->
+    <footer class="footer" id="footer">
+      <div class="container">
+        <span class="footer-logo">Xpresso CLI</span>
+        <p>Scaffold smarter. Ship faster.</p>
+        <nav class="footer-links" aria-label="Footer links">
+          <a href="https://github.com/KrishDhimanOfficial/xpresso-cli" id="footer-github" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://www.npmjs.com/package/xpresso-cli" id="footer-npm" target="_blank" rel="noopener">npm</a>
+          <a href="https://github.com/KrishDhimanOfficial/xpresso-cli/issues" id="footer-issues" target="_blank" rel="noopener">Issues</a>
+        </nav>
+        <p style="margin-top:12px">
+          Made with 💜 by
+          <a href="https://github.com/KrishDhimanOfficial" id="footer-author" target="_blank" rel="noopener"
+             style="color: #a78bfa; text-decoration: none;">Krish Dhiman</a>
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      /* Scroll Reveal */
+      const revealObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              /* Stagger children if feature-card siblings */
+              const cards = entry.target.querySelectorAll('.feature-card, .cmd-card');
+              cards.forEach((card, i) => {
+                card.style.transitionDelay = `${i * 80}ms`;
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    card.style.transition = 'opacity .5s ease, transform .5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'none';
+                  });
+                });
+              });
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12 }
+      );
+
+      document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el));
+    </script>
+  </body>
+</html>
