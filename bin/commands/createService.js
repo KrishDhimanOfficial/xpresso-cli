@@ -3,141 +3,190 @@ import path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
 
-export async function createServiceCommand(serviceName, targetDir = process.cwd()) {
-    if (!serviceName) {
-        console.error(chalk.red('Please provide a service name. Example: create-node-app create-service auth'));
-        process.exit(1);
-    }
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-    const currentDir = targetDir;
-    const packageJsonPath = path.join(currentDir, 'package.json');
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
-    // Default to no database if not found
-    let dbType = 'none';
+/** Ensure a directory exists, then write a file and log the result. */
+function writeFile(filePath, content, cwd) {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, content, 'utf8');
+    const relative = path.relative(cwd, filePath);
+    console.log(`  ${chalk.green('✔')}  Created  ${chalk.cyan(relative)}`);
+}
 
-    if (fs.existsSync(packageJsonPath)) {
-        try {
-            const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-            const deps = pkg.dependencies || {};
-            if (deps.mongoose) {
-                dbType = 'mongoose';
-            } else if (deps.sequelize) {
-                dbType = 'sequelize';
+/** Patch a file in-place and log what changed. */
+function patchFile(filePath, patches, cwd) {
+    let content = fs.readFileSync(filePath, 'utf8');
+    const relative = path.relative(cwd, filePath);
+    const added = [];
+
+    for (const { marker, line, position } of patches) {
+        if (content.includes(line)) continue;   // already present
+
+        if (position === 'after-last-import') {
+            const lastImportIdx = content.lastIndexOf('import ');
+            if (lastImportIdx !== -1) {
+                const eol = content.indexOf('\n', lastImportIdx);
+                content = content.slice(0, eol + 1) + line + '\n' + content.slice(eol + 1);
+            } else {
+                content = line + '\n' + content;
             }
-        } catch (error) {
-            console.warn(chalk.yellow('Could not parse package.json. Defaulting to standard model generation.'));
+        } else if (position === 'before-router-export') {
+            // insert before `export default router` in index.routes.js
+            const exportIdx = content.lastIndexOf('export default router');
+            if (exportIdx !== -1) {
+                content = content.slice(0, exportIdx) + line + '\n' + content.slice(exportIdx);
+            } else {
+                content += '\n' + line + '\n';
+            }
         }
-    } else {
-        console.warn(chalk.yellow('No package.json found in current directory. Generating service without database dependencies.'));
+
+        added.push(line.trim());
     }
 
-    const serviceDir = path.join(currentDir, 'modules', serviceName);
+    fs.writeFileSync(filePath, content, 'utf8');
 
-    const spinner = ora(`Generating ${serviceName} service...`).start();
+    if (added.length) {
+        console.log(`  ${chalk.yellow('↪')}  Updated  ${chalk.cyan(relative)}`);
+        added.forEach((l) => console.log(`           ${chalk.dim('+')} ${l}`));
+    }
+}
 
-    try {
-        // Create directory
-        fs.mkdirSync(serviceDir, { recursive: true });
+// ─── File Templates ───────────────────────────────────────────────────────────
 
-        // Generate Controller
-        const controllerContent = `import ${serviceName}Model from './${serviceName}.model.js';
+function buildController(name) {
+    return `import ${name}Model from '../models/${name}.model.js'
 
 export default {
-    // Add your controller methods here
-    // exampleMethod: async (req, res, next) => { ... }
+    // TODO: add controller methods
+    // example: async (req, res, next) => { }
 }
-        `;
-        fs.writeFileSync(path.join(serviceDir, `${serviceName}.controller.js`), controllerContent);
+`;
+}
 
-        // Generate Routes
-        const routesContent = `import express from 'express'
-import ${serviceName}Controller from './${serviceName}.controller.js'
+function buildRoutes(name) {
+    return `import express from 'express'
+import ${name}Controller from '../controllers/${name}.controller.js'
 
 const router = express.Router({ caseSensitive: true })
 
-// Add your routes here
-// router.get('/', ${serviceName}Controller.exampleMethod)
+// TODO: register routes
+// router.get('/', ${name}Controller.example)
 
 export default router
 `;
-        fs.writeFileSync(path.join(serviceDir, `${serviceName}.routes.js`), routesContent);
+}
 
-        // Generate Model
-        let modelContent = '';
-        if (dbType === 'sequelize') {
-            modelContent = `import { DataTypes } from 'sequelize'
-import sequelize from '../../config/db.config.js'
+function buildModel(name, dbType) {
+    const Name = capitalize(name);
 
-const ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)} = sequelize.define('${serviceName}', {
+    if (dbType === 'sequelize') {
+        return `import { DataTypes } from 'sequelize'
+import sequelize from '../config/db.config.js'
+
+const ${Name} = sequelize.define('${name}', {
+    // TODO: define columns
     name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+    },
+}, { timestamps: true })
+
+export default ${Name}
+`;
     }
-}, {
-    timestamps: true
-})
 
-export default ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}
+    // Default: mongoose
+    return `import mongoose from 'mongoose'
+
+const ${name}Schema = new mongoose.Schema({
+    // TODO: define fields
+
+}, { timestamps: true })
+
+export default mongoose.model('${Name}', ${name}Schema)
 `;
-        } else {
-            // Default to mongoose structure
-            modelContent = `import mongoose from "mongoose";
+}
 
-const ${serviceName}Schema = new mongoose.Schema({
-    
-})
+// ─── Main Command ─────────────────────────────────────────────────────────────
 
-export default mongoose.model('${serviceName}', ${serviceName}Schema);
-`;
+export async function createServiceCommand(serviceName, targetDir = process.cwd()) {
+    if (!serviceName) {
+        console.error(chalk.red('Please provide a service name.  Example: xpresso-cli generate auth'));
+        process.exit(1);
+    }
+
+    const cwd = targetDir;
+    const packageJsonPath = path.join(cwd, 'package.json');
+
+    // ── detect DB ──────────────────────────────────────────────────────────────
+    let dbType = 'none';
+    if (fs.existsSync(packageJsonPath)) {
+        try {
+            const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+            const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+            if (deps.mongoose)   dbType = 'mongoose';
+            else if (deps.sequelize) dbType = 'sequelize';
+        } catch {
+            console.warn(chalk.yellow('⚠  Could not parse package.json — defaulting to mongoose model.'));
+        }
+    } else {
+        console.warn(chalk.yellow('⚠  No package.json found — generating service without DB dependencies.'));
+    }
+
+    // ── destination paths ──────────────────────────────────────────────────────
+    const controllerPath  = path.join(cwd, 'controllers', `${serviceName}.controller.js`);
+    const routesPath      = path.join(cwd, 'routes',      `${serviceName}.routes.js`);
+    const modelPath       = path.join(cwd, 'models',      `${serviceName}.model.js`);
+    const indexRoutesPath = path.join(cwd, 'routes',      'index.routes.js');
+
+    const spinner = ora(`Generating ${chalk.bold(serviceName)} service…`).start();
+
+    try {
+        spinner.stop();   // stop so our per-file logs are visible
+
+        console.log('');
+        console.log(chalk.bold(`📂  Scaffolding "${serviceName}" service`));
+        console.log('');
+
+        // ── create files ───────────────────────────────────────────────────────
+        writeFile(controllerPath, buildController(serviceName), cwd);
+        writeFile(routesPath,     buildRoutes(serviceName),     cwd);
+        writeFile(modelPath,      buildModel(serviceName, dbType), cwd);
+
+        // ── patch routes/index.routes.js ───────────────────────────────────────
+        if (fs.existsSync(indexRoutesPath)) {
+            console.log('');
+
+            const importLine = `import ${serviceName}Routes from './${serviceName}.routes.js'`;
+            const useLine    = `router.use('/api/${serviceName}', ${serviceName}Routes)`;
+
+            patchFile(indexRoutesPath, [
+                { line: importLine, position: 'after-last-import' },
+                { line: useLine,    position: 'before-router-export' },
+            ], cwd);
         }
 
-        fs.writeFileSync(path.join(serviceDir, `${serviceName}.model.js`), modelContent);
+        // ── summary ────────────────────────────────────────────────────────────
+        console.log('');
+        console.log(chalk.bold.green('✅  Done!'));
+        console.log('');
+        console.log(`  ${chalk.dim('controllers/')}${serviceName}.controller.js`);
+        console.log(`  ${chalk.dim('routes/'     )}${serviceName}.routes.js`);
+        console.log(`  ${chalk.dim('models/'     )}${serviceName}.model.js`);
 
-        // Try to update app.js automatically
-        const appJsPath = path.join(currentDir, 'app.js');
-        if (fs.existsSync(appJsPath)) {
-            let appJsContent = fs.readFileSync(appJsPath, 'utf8');
-
-            const importStatement = `import ${serviceName}Routes from './modules/${serviceName}/${serviceName}.routes.js'`;
-            const useStatement = `app.use('/api/${serviceName}', ${serviceName}Routes)`;
-
-            // Inject import statement after the last import
-            if (!appJsContent.includes(importStatement)) {
-                const lastImportIndex = appJsContent.lastIndexOf('import ');
-                if (lastImportIndex !== -1) {
-                    const endOfLastImport = appJsContent.indexOf('\n', lastImportIndex);
-                    appJsContent = appJsContent.slice(0, endOfLastImport + 1) + importStatement + '\n' + appJsContent.slice(endOfLastImport + 1);
-                } else {
-                    appJsContent = importStatement + '\n' + appJsContent;
-                }
-            }
-
-            // Inject app.use statement before app.get('/', or before export default
-            if (!appJsContent.includes(useStatement)) {
-                const appGetIndex = appJsContent.indexOf("app.get('/'");
-                if (appGetIndex !== -1) {
-                    appJsContent = appJsContent.slice(0, appGetIndex) + useStatement + '\n\n' + appJsContent.slice(appGetIndex);
-                } else {
-                    const exportIndex = appJsContent.lastIndexOf('export default app');
-                    if (exportIndex !== -1) {
-                        appJsContent = appJsContent.slice(0, exportIndex) + useStatement + '\n\n' + appJsContent.slice(exportIndex);
-                    } else {
-                        appJsContent += '\n' + useStatement + '\n';
-                    }
-                }
-            }
-
-            fs.writeFileSync(appJsPath, appJsContent);
-            spinner.succeed(`Successfully created ${chalk.green(serviceName)} module and updated app.js`);
-        } else {
-            spinner.succeed(`Successfully created ${chalk.green(serviceName)} Module at ./modules/${serviceName}`);
-            console.log(`\nDon't forget to register your routes in ${chalk.cyan('app.js')}!`);
-            console.log(`  import ${serviceName}Routes from './modules/${serviceName}/${serviceName}.routes.js'`);
-            console.log(`  app.use('/api/${serviceName}', ${serviceName}Routes)\n`);
+        if (!fs.existsSync(indexRoutesPath)) {
+            console.log('');
+            console.log(chalk.yellow("  routes/index.routes.js not found — register the route manually:"));
+            console.log(`    ${chalk.cyan(`import ${serviceName}Routes from './${serviceName}.routes.js'`)}`);
+            console.log(`    ${chalk.cyan(`router.use('/api/${serviceName}', ${serviceName}Routes)`)}`);
         }
+
+        console.log('');
 
     } catch (err) {
-        spinner.fail(`Failed to create ${serviceName} service.`);
+        spinner.fail(chalk.red(`Failed to create "${serviceName}" service.`));
         console.error(err);
         process.exit(1);
     }

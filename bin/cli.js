@@ -18,8 +18,7 @@ program
     .action(initCommand);
 
 program
-    .command('generate mod <moduleName>')
-    .alias('gen')
+    .command('create <moduleName>')
     .description('Scaffold a new module (model, controller, routes)')
     .action((moduleName) => createServiceCommand(moduleName));
 

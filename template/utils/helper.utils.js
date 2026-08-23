@@ -2,6 +2,8 @@ import { deleteFile } from './removeFile.utils.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import crypto from 'node:crypto'
+import config from '../config/config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -62,4 +64,69 @@ export const globalErrorHandler = (err, req, res, next) => {
             message: errorMessage,
         }
     )
+}
+
+const getDerivedKey = () => {
+    const secret = config.token_sceret;
+    if (!secret) {
+        console.warn('⚠️  TOKEN_SECRET is not set. Using a random key — tokens will NOT survive process restarts!')
+        return crypto.randomBytes(32)
+    }
+    return crypto.createHash('sha256').update(secret).digest()
+}
+
+export const encryptToken = (data, ttlSec) => {
+    const key      = getDerivedKey()
+    const iv       = crypto.randomBytes(16)
+    const cipher   = crypto.createCipheriv('aes-256-gcm', key, iv)
+
+    const payload  = JSON.stringify({
+        data,
+        ...(ttlSec && { expiresAt: Date.now() + ttlSec * 1_000 }),
+    })
+
+    const encrypted = Buffer.concat([
+        cipher.update(payload, 'utf8'),
+        cipher.final(),
+    ])
+
+    const authTag = cipher.getAuthTag()
+
+    // Format: iv:authTag:ciphertext  (all hex-encoded, colon-separated)
+    return [
+        iv.toString('hex'),
+        authTag.toString('hex'),
+        encrypted.toString('hex'),
+    ].join(':')
+}
+
+export const decryptToken = (token) => {
+    try {
+        const parts = token.split(':')
+        if (parts.length !== 3) throw new Error('Invalid token format')
+
+        const [ivHex, authTagHex, ciphertextHex] = parts
+        const key       = getDerivedKey()
+        const iv        = Buffer.from(ivHex, 'hex')
+        const authTag   = Buffer.from(authTagHex, 'hex')
+        const encrypted = Buffer.from(ciphertextHex, 'hex')
+
+        const decipher  = crypto.createDecipheriv('aes-256-gcm', key, iv)
+        decipher.setAuthTag(authTag)        // GCM auth — throws if tampered
+
+        const decrypted = Buffer.concat([
+            decipher.update(encrypted),
+            decipher.final(),
+        ]).toString('utf8')
+
+        const { data, expiresAt } = JSON.parse(decrypted)
+
+        if (Date.now() > expiresAt) throw ApiError('Token has expired', 401)
+
+        return data
+    } catch (err) {
+        // Re-throw ApiError instances directly; wrap everything else
+        if (err.statusCode) throw err
+        throw ApiError('Invalid or expired token', 401)
+    }
 }

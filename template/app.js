@@ -6,6 +6,7 @@ import compression from 'compression'
 import cors from 'cors'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import indexRoutes from './routes/index.routes.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -27,10 +28,14 @@ app.use(cookieParser())
 app.use('/public', express.static(path.join(__dirname, 'public')))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
+// ─── Welcome ──────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   return res.status(200).sendFile(path.join(__dirname, 'template', 'welcome.template.html'))
 })
 
-// error handler
+// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use('/', indexRoutes)
+
+// ─── Error Handler ────────────────────────────────────────────────────────────
 app.use(globalErrorHandler)
 export default app

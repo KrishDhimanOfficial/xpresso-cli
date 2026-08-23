@@ -759,7 +759,7 @@
           <span class="logo-icon">X</span>
           Xpresso CLI
         </a>
-        <span class="nav-badge">v1.3.2</span>
+        <span class="nav-badge">v1.3.4</span>
       </div>
     </nav>
 
@@ -820,9 +820,12 @@
             <span class="tl"> </span>
             <span class="tl">
               <span class="tl-prompt">my-app </span>
-              <span class="tl-cmd">generate mod product</span>
+              <span class="tl-cmd">xpresso-cli create product</span>
             </span>
-            <span class="tl tl-success">✔ Created <span class="tl-accent">product</span> module and updated app.js</span>
+            <span class="tl tl-success">✔ Created  <span class="tl-accent">controllers/product.controller.js</span></span>
+            <span class="tl tl-success">✔ Created  <span class="tl-accent">routes/product.routes.js</span></span>
+            <span class="tl tl-success">✔ Created  <span class="tl-accent">models/product.model.js</span></span>
+            <span class="tl tl-out">↪  Updated  <span class="tl-accent">routes/index.routes.js</span></span>
             <span class="tl"> </span>
             <span class="tl">
               <span class="tl-prompt">my-app </span>
@@ -945,19 +948,20 @@
         <div class="features-grid reveal" style="margin-top: 48px;">
           <article class="feature-card" id="feat-modular">
             <div class="feature-icon purple">🧩</div>
-            <h3 class="feature-title">Modular Architecture</h3>
+            <h3 class="feature-title">Flat MVC Architecture</h3>
             <p class="feature-desc">
-              Each feature lives in its own <code>modules/</code> folder with
-              dedicated <code>.controller.js</code>, <code>.routes.js</code>, and <code>.model.js</code>.
+              All services share clean top-level <code>controllers/</code>, <code>routes/</code>,
+              and <code>models/</code> directories — no nesting, no bloat.
             </p>
           </article>
 
           <article class="feature-card" id="feat-generate">
             <div class="feature-icon red">🛠️</div>
-            <h3 class="feature-title">Code Generator</h3>
+            <h3 class="feature-title">Inline Code Generator</h3>
             <p class="feature-desc">
-              Run <code>generate mod &lt;name&gt;</code> anywhere in your project.
-              Controller, routes, and model are created and auto-registered in <code>app.js</code>.
+              Run <code>xpresso-cli create &lt;name&gt;</code> anywhere in your project.
+              Controller, routes, and model are created and auto-wired into
+              <code>routes/index.routes.js</code> — no manual registration.
             </p>
           </article>
 
@@ -983,17 +987,17 @@
             <div class="feature-icon pink">🔐</div>
             <h3 class="feature-title">Auth Bootstrapped</h3>
             <p class="feature-desc">
-              A complete auth module is scaffolded automatically — signup, login,
-              and JWT patterns ready to extend from day one.
+              A complete <code>auth</code> service is scaffolded automatically on every
+              new project — controller, routes, and DB model, ready to extend.
             </p>
           </article>
 
-          <article class="feature-card" id="feat-smartinstall">
-            <div class="feature-icon green">✅</div>
-            <h3 class="feature-title">Smart Install Check</h3>
+          <article class="feature-card" id="feat-dbdetect">
+            <div class="feature-icon green">🔍</div>
+            <h3 class="feature-title">Auto DB Detection</h3>
             <p class="feature-desc">
-              If your chosen package manager isn't installed, the CLI warns you
-              gracefully with the install URL — scaffold never fails.
+              <code>xpresso-cli create</code> reads your <code>package.json</code> deps
+              to auto-detect Mongoose or Sequelize and generate the right model template.
             </p>
           </article>
         </div>
@@ -1010,13 +1014,13 @@
         </div>
 
         <div class="commands-grid reveal">
-          <div class="cmd-card" id="cmd-generate">
-            <div class="cmd-name">generate mod &lt;name&gt;</div>
-            <p class="cmd-desc">Scaffold a complete module: controller, routes, and model — auto-registered in app.js.</p>
-          </div>
           <div class="cmd-card" id="cmd-init">
             <div class="cmd-name">xpresso-cli [project]</div>
-            <p class="cmd-desc">Bootstrap a full Express application from scratch with your preferred database.</p>
+            <p class="cmd-desc">Bootstrap a full Express application from scratch with your preferred package manager and database.</p>
+          </div>
+          <div class="cmd-card" id="cmd-create">
+            <div class="cmd-name">xpresso-cli create &lt;name&gt;</div>
+            <p class="cmd-desc">Scaffold a complete service: controller, routes, and model — auto-wired into routes/index.routes.js. DB type detected from package.json.</p>
           </div>
           <div class="cmd-card" id="cmd-dev">
             <div class="cmd-name">npm run dev</div>

@@ -3,18 +3,19 @@
 [![npm version](https://img.shields.io/npm/v/xpresso-cli.svg)](https://www.npmjs.com/package/xpresso-cli)
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 
-A powerful, blazing-fast CLI tool to instantly scaffold production-ready **Node.js + Express** applications. Choose your package manager, pick your database, and get a clean modular structure — all in seconds.
+A powerful, blazing-fast CLI tool to instantly scaffold production-ready **Node.js + Express** applications. Choose your package manager, pick your database, and get a clean flat MVC structure — all in seconds.
 
 ---
 
 ## ✨ Features
 
-- **⚡ Instant Scaffold** — Full production-ready Express MVC structure in one command.
+- **⚡ Instant Scaffold** — Full production-ready Express flat-MVC structure in one command.
 - **🗄️ Multi-Database Support** — MongoDB (Mongoose), MySQL (Sequelize), PostgreSQL (Sequelize), or None.
 - **📦 4 Package Managers** — Choose from `npm`, `yarn`, `pnpm`, or `bun`.
-- **🛠️ Module Generator** — `generate mod <name>` scaffolds a complete module and auto-wires it into `app.js`.
+- **🛠️ Inline Service Generator** — `xpresso-cli create <name>` scaffolds a complete service and auto-wires it into `routes/index.routes.js`.
+- **🔍 Auto DB Detection** — The `create` command reads your `package.json` dependencies to detect Mongoose or Sequelize and generate the right model template automatically.
 - **🔒 Production Middleware** — CORS, gzip compression, cookie-parser, Morgan logging, and a global error handler — pre-configured.
-- **🔐 Auth Module** — A complete `auth` module (controller, routes, model) is generated automatically on every scaffold.
+- **🔐 Auth Service** — A complete `auth` service (controller, routes, model) is generated automatically on every scaffold.
 - **📦 Native ESM** — `type: "module"` from day one. No Babel, no transpilation.
 - **✅ Smart Install Check** — If your chosen package manager isn't installed, the CLI warns you gracefully and skips install instead of crashing.
 
@@ -71,7 +72,7 @@ The CLI will ask you two questions during scaffold:
 Once confirmed, the CLI will automatically:
 - Copy the Express template into your project folder
 - Configure the database connection file
-- Generate an `auth` module tailored to your chosen database
+- Generate an `auth` service tailored to your chosen database
 - Install all dependencies using your chosen package manager
 
 > ⚠️ **Note:** If you selected `bun` or another package manager that isn't installed on your machine, the CLI will warn you with the install URL and skip the install step — the scaffold still completes successfully. Just run `<pm> install` manually afterward.
@@ -89,42 +90,49 @@ Your server starts on the configured port. Visit `http://localhost:<port>` to se
 
 ---
 
-## 🏗️ Module Generator
+## 🏗️ Service Generator
 
-Once inside your project, use the `generate` binary to scaffold new modules instantly:
+Once inside your project, use the `create` command to scaffold new services instantly:
 
 ```bash
-generate mod <moduleName>
+xpresso-cli create <serviceName>
 ```
 
 **Example:**
 
 ```bash
-generate mod product
-generate mod order
-generate mod user
+xpresso-cli create product
+xpresso-cli create order
+xpresso-cli create user
 ```
 
 ### What gets created
 
-For `generate mod product`, the CLI creates:
+For `xpresso-cli create product`, the CLI creates:
 
 ```
-modules/
-└── product/
-    ├── product.controller.js   # Controller with model import
-    ├── product.routes.js       # Express router
-    └── product.model.js        # DB model (Mongoose or Sequelize schema)
+controllers/
+└── product.controller.js   # Controller with model import
+
+routes/
+└── product.routes.js       # Express router
+
+models/
+└── product.model.js        # DB model (Mongoose or Sequelize — auto-detected from package.json)
 ```
 
-And **automatically updates `app.js`** with:
+And **automatically updates `routes/index.routes.js`** with:
 
 ```js
-import productRoutes from './modules/product/product.routes.js'
-app.use('/api/product', productRoutes)
+import productRoutes from './product.routes.js'
+router.use('/api/product', productRoutes)
 ```
 
 No manual wiring needed.
+
+> 💡 **Auto DB Detection** — `xpresso-cli create` inspects your `package.json` dependencies to detect whether you're using `mongoose` or `sequelize` and generates the correct model template automatically.
+
+> ⚠️ **No `index.routes.js`?** — If the file is missing, the CLI prints the import and `router.use()` lines for you to add manually.
 
 ---
 
@@ -136,22 +144,23 @@ my-app/
 │   └── www                      # Server startup script
 ├── config/
 │   └── db.config.js             # Database connection (auto-configured)
+├── controllers/
+│   ├── auth.controller.js       # Auto-generated on scaffold
+│   └── <name>.controller.js     # Generated via `xpresso-cli create <name>`
 ├── middleware/                  # Custom middleware
-├── modules/
-│   ├── auth/                    # Auto-generated on scaffold
-│   │   ├── auth.controller.js
-│   │   ├── auth.routes.js
-│   │   └── auth.model.js
-│   └── <your-module>/           # Generated via `generate mod <name>`
-│       ├── <name>.controller.js
-│       ├── <name>.routes.js
-│       └── <name>.model.js
+├── models/
+│   ├── auth.model.js            # Auto-generated on scaffold
+│   └── <name>.model.js          # Generated via `xpresso-cli create <name>`
+├── routes/
+│   ├── index.routes.js          # Central router (auto-updated with new routes)
+│   ├── auth.routes.js           # Auto-generated on scaffold
+│   └── <name>.routes.js         # Generated via `xpresso-cli create <name>`
 ├── public/                      # Static assets (served at /public)
 ├── uploads/                     # Uploaded files (served at /uploads)
 ├── utils/
 │   ├── helper.utils.js          # Global error handler & helpers
 │   └── removeFile.utils.js      # File cleanup utility
-├── app.js                       # Express app (auto-updated with new routes)
+├── app.js                       # Express app entry point
 └── package.json
 ```
 
@@ -169,14 +178,17 @@ xpresso-cli my-app
 xpresso-cli
 ```
 
-### `generate mod <moduleName>`
+### `xpresso-cli create <serviceName>`
 
-Scaffold a new module inside an existing project.
+Scaffold a new service inside an existing project.
 
 ```bash
-generate mod user
-generate mod product
+xpresso-cli create user
+xpresso-cli create product
+xpresso-cli create order
 ```
+
+Creates `controllers/<name>.controller.js`, `routes/<name>.routes.js`, and `models/<name>.model.js` — and auto-wires them into `routes/index.routes.js`.
 
 ---
 
