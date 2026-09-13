@@ -17,6 +17,7 @@ A powerful, blazing-fast CLI tool to instantly scaffold production-ready **Node.
 - **🔒 Production Middleware** — CORS, gzip compression, cookie-parser, Morgan logging, and a global error handler — pre-configured.
 - **🔐 Auth Service** — A complete `auth` service (controller, routes, model) is generated automatically on every scaffold.
 - **📦 Native ESM** — `type: "module"` from day one. No Babel, no transpilation.
+- **🌍 Environment Aware** — Dynamically loads `.env.development` or `.env.production` based on `NODE_ENV`, with strict variable validation on startup.
 - **✅ Smart Install Check** — If your chosen package manager isn't installed, the CLI warns you gracefully and skips install instead of crashing.
 
 ---
@@ -143,6 +144,7 @@ my-app/
 ├── bin/
 │   └── www                      # Server startup script
 ├── config/
+│   ├── config.js                # Environment configuration loader
 │   └── db.config.js             # Database connection (auto-configured)
 ├── controllers/
 │   ├── auth.controller.js       # Auto-generated on scaffold
@@ -161,6 +163,8 @@ my-app/
 │   ├── helper.utils.js          # Global error handler & helpers
 │   └── removeFile.utils.js      # File cleanup utility
 ├── app.js                       # Express app entry point
+├── .env.development             # Development environment variables
+├── .env.production              # Production environment variables
 └── package.json
 ```
 
